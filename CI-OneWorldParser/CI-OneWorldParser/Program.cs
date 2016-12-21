@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-//using System.Data.SqlClient;
+using System.Configuration;
 using System.Data.SQLite;
 using System.Globalization;
 using System.IO;
@@ -11,6 +11,7 @@ using System.Xml;
 using System.IO.Compression;
 using CsvHelper;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace CI_OneWorldParser
 {
@@ -59,86 +60,20 @@ namespace CI_OneWorldParser
             public Boolean FlightNonStop;
             public string FlightVia;
         }
-
-        public class IATAAirport
-        {
-            public string stop_id;
-            public string stop_name;
-            public string stop_desc;
-            public string stop_lat;
-            public string stop_lon;
-            public string zone_id;
-            public string stop_url;
-        }
-
-
+        
         public class IATAAirline
         {
             public string Airline_Name;
             public string Airline_IATA;            
         }
-
-        public class AirlinesDef
-        {
-            // Auto-implemented properties.  
-            public string Name { get; set; }
-            public string IATA { get; set; }
-            public string DisplayName { get; set; }
-            public string WebsiteUrl { get; set; }
-        }
-
-        public static List<AirlinesDef> _Airlines = new List<AirlinesDef>
-        {
-            new AirlinesDef { IATA = "DA", Name="AEROLINEA DE ANTIOQUIA S.A.", DisplayName="ADA",WebsiteUrl="https://www.ada-aero.com/" },
-            new AirlinesDef { IATA = "EF", Name="EASYFLY S.A", DisplayName="Easyfly",WebsiteUrl="http://www.easyfly.com.co" },
-            new AirlinesDef { IATA = "2K", Name="AEROGAL", DisplayName="Avianca Ecuador",WebsiteUrl="http://www.avianca.com" },
-            new AirlinesDef { IATA = "9H", Name="DUTCH ANTILLES EXPRESS SUCURSAL COLOMBIA", DisplayName="Dutch Antilles Express",WebsiteUrl="https://nl.wikipedia.org/wiki/Dutch_Antilles_Express" },
-            new AirlinesDef { IATA = "AR", Name="AEROLINEAS ARGENTINAS", DisplayName="Aerolíneas Argentinas",WebsiteUrl="http://www.aerolineas.com.ar/" },
-            new AirlinesDef { IATA = "AM", Name="AEROMEXICO SUCURSAL COLOMBIA", DisplayName="Aeroméxico",WebsiteUrl="http://www.aeromexico.com/" },
-            new AirlinesDef { IATA = "P5", Name="AEROREPUBLICA", DisplayName="Copa Airlines",WebsiteUrl="http://www.copa.com" },
-            new AirlinesDef { IATA = "AC", Name="Air Canada", DisplayName="Air Canada",WebsiteUrl="http://www.aircanada.com" },
-            new AirlinesDef { IATA = "AF", Name="AIR FRANCE", DisplayName="Air France",WebsiteUrl="http://www.airfrance.com" },
-            new AirlinesDef { IATA = "4C", Name="AIRES", DisplayName="LATAM Colombia",WebsiteUrl="http://www.latam.com/" },
-            new AirlinesDef { IATA = "AA", Name="AMERICAN", DisplayName="American Airlines",WebsiteUrl="http://www.aa.com" },
-            new AirlinesDef { IATA = "AV", Name="Avianca", DisplayName="Avianca",WebsiteUrl="http://www.avianca.com" },
-            new AirlinesDef { IATA = "V0", Name="CONVIASA", DisplayName="Conviasa",WebsiteUrl="http://www.conviasa.aero/" },
-            new AirlinesDef { IATA = "CM", Name="COPA", DisplayName="Copa Airlines",WebsiteUrl="http://www.copaair.com/" },
-            new AirlinesDef { IATA = "CU", Name="CUBANA", DisplayName="Cubana de Aviación",WebsiteUrl="http://www.cubana.cu/home/?lang=en" },
-            new AirlinesDef { IATA = "DL", Name="DELTA", DisplayName="Delta",WebsiteUrl="http://www.delta.com" },
-            new AirlinesDef { IATA = "4O", Name="INTERJET", DisplayName="Interjet",WebsiteUrl="http://www.interjet.com/" },
-            new AirlinesDef { IATA = "5Z", Name="FAST COLOMBIA SAS", DisplayName="ViVaColombia",WebsiteUrl="http://www.vivacolombia.co/" },
-            new AirlinesDef { IATA = "IB", Name="IBERIA", DisplayName="Iberia",WebsiteUrl="http://www.iberia.com" },
-            new AirlinesDef { IATA = "B6", Name="JETBLUE AIRWAYS CORPORATION", DisplayName="Jetblue",WebsiteUrl="http://www.jetblue.com" },
-            new AirlinesDef { IATA = "LR", Name="LACSA", DisplayName="Avianca Costa Rica",WebsiteUrl="http://www.avianca.com" },
-            new AirlinesDef { IATA = "LA", Name="LAN AIRLINES S.A.", DisplayName="LAN Airlines",WebsiteUrl="http://www.lan.com/" },
-            new AirlinesDef { IATA = "LP", Name="LAN PERU", DisplayName="LAN Airlines",WebsiteUrl="http://www.lan.com/" },
-            new AirlinesDef { IATA = "LH", Name="Lufthansa", DisplayName="Lufthansa",WebsiteUrl="http://www.lufthansa.com" },
-            new AirlinesDef { IATA = "9R", Name="SERVICIO AEREO A TERRITORIOS NACIONALES SATENA", DisplayName="Satena",WebsiteUrl="http://www.satena.com/" },
-            new AirlinesDef { IATA = "NK", Name="SPIRIT AIRLINES", DisplayName="Spirit",WebsiteUrl="http://www.spirit.com" },
-            new AirlinesDef { IATA = "TA", Name="TACA INTERNATIONAL", DisplayName="TACA Airlines",WebsiteUrl="http://www.taca.com/" },
-            new AirlinesDef { IATA = "EQ", Name="TAME", DisplayName="TAME",WebsiteUrl="http://www.tame.com.ec/" },
-            new AirlinesDef { IATA = "3P", Name="TIARA", DisplayName="Tiara Air Aruba",WebsiteUrl="http://www.tiara-air.com/" },
-            new AirlinesDef { IATA = "T0", Name="TRANS AMERICAN AIR LINES S.A. SUCURSAL COL.", DisplayName="Trans American Airlines",WebsiteUrl="http://www.avianca.com/" },
-            new AirlinesDef { IATA = "UA", Name="United Airlines", DisplayName="United",WebsiteUrl="http://www.united.com" },
-            new AirlinesDef { IATA = "4C", Name="LATAM AIRLINES GROUP S.A SUCURSAL COLOMBIA", DisplayName="LATAM",WebsiteUrl="http://www.latam.com/" },
-            new AirlinesDef { IATA = "TP", Name="TAP PORTUGAL SUCURSAL COLOMBIA", DisplayName="TAP",WebsiteUrl="http://www.flytap.com" },
-            new AirlinesDef { IATA = "7P", Name="AIR PANAMA", DisplayName="Air Panama",WebsiteUrl="http://www.airpanama.com/" },
-            new AirlinesDef { IATA = "O6", Name="OCEANAIR", DisplayName="Avianca Brazil",WebsiteUrl="http://www.avianca.com" },
-            new AirlinesDef { IATA = "8I", Name="INSELAIR ARUBA", DisplayName="Insel Air Aruba",WebsiteUrl="http://www.fly-inselair.com/"},
-            new AirlinesDef { IATA = "7I", Name="INSEL AIR", DisplayName="Insel Air",WebsiteUrl="http://www.fly-inselair.com/"},
-            new AirlinesDef { IATA = "TK", Name="Turkish Airlines", DisplayName="Turkish Airlines",WebsiteUrl="http://www.turkishairlines.com"},
-            new AirlinesDef { IATA = "UX", Name="AIR EUROPA", DisplayName="Air Europe",WebsiteUrl="http://www.aireurope.com"},
-            new AirlinesDef { IATA = "9V", Name="AVIOR AIRLINES,C.A.", DisplayName="Avior Airlines",WebsiteUrl="http://www.avior.com.ve/"},
-            new AirlinesDef { IATA = "KL", Name="KLM", DisplayName="KLM",WebsiteUrl="http://www.klm.nl"},
-            new AirlinesDef { IATA = "JJ", Name="TAM", DisplayName="TAM Linhas Aéreas",WebsiteUrl="http://www.latam.com/"},
-            new AirlinesDef { IATA = "BA", Name="BA", DisplayName="Britsch Airways",WebsiteUrl="http://www.ba.com/"}
-        };
-
+       
         static void Main(string[] args)
         {
             string DataDir = AppDomain.CurrentDomain.BaseDirectory + "\\data";
             System.IO.Directory.CreateDirectory(DataDir);
             string sqldb = Path.Combine(DataDir, "cm.sqlite");
+            string APIPathAirport = "airport/iata/";
+            string APIPathAirline = "airline/iata/";
             List<CIFLight> CIFLights = new List<CIFLight> { };
             List<Airport> Airports = new List<Airport> { };
             Console.WriteLine("Requesting Latest update...");
@@ -375,39 +310,12 @@ namespace CI_OneWorldParser
 
             writer.Serialize(file, CIFLights);
             file.Close();
-
-            Console.WriteLine("Reading IATA Airports....");
-
-            //StreamReader fileairports = new StreamReader(@"airports.csv");
-            //var csvairport = new CsvReader(fileairports);
-            //csvairport.Configuration.Delimiter = ",";
-            //csvairport.Configuration.Encoding = Encoding.UTF8;
-            ////var generatedMap = csvairport.Configuration.AutoMap<IATAAirport>();
-            ////csv.Configuration.RegisterClassMap<IATAAirport>();
-            //var IATAAirports = csvairport.GetRecords<IATAAirport>().ToList();
-
-
-
-
-            string IATAAirportsFile = AppDomain.CurrentDomain.BaseDirectory + "IATAAirports.json";
-            JArray o1 = JArray.Parse(File.ReadAllText(IATAAirportsFile));
-            IList<IATAAirport> TempIATAAirports = o1.ToObject<IList<IATAAirport>>();
-            var IATAAirports = TempIATAAirports as List<IATAAirport>;
-
-            //Console.WriteLine("Reading IATA Airlines....");
-            //string IATAAirlineFile = AppDomain.CurrentDomain.BaseDirectory + "IATAAirlines.json";
-            //JArray o2 = JArray.Parse(File.ReadAllText(IATAAirlineFile));
-            //IList<IATAAirline> TempIATAAirline = o2.ToObject<IList<IATAAirline>>();
-            //var IATAAirlines = TempIATAAirline as List<IATAAirline>;
+            
             Console.WriteLine("Generate GTFS Files...");
-
-           
-                        
+                                    
             string gtfsDir = AppDomain.CurrentDomain.BaseDirectory + "\\gtfs";
             System.IO.Directory.CreateDirectory(gtfsDir);
             Console.WriteLine("Creating GTFS File agency.txt...");
-
-            
 
             using (var gtfsagency = new StreamWriter(@"gtfs\\agency.txt"))
             {
@@ -430,20 +338,23 @@ namespace CI_OneWorldParser
 
                 for (int i = 0; i < airlines.Count; i++) // Loop through List with for)
                 {
-                    string temp_airline = airlines[i].FlightAirline;
-                    var item4 = _Airlines.Find(q => q.IATA == airlines[i].FlightAirline);
-                    string TEMP_Name = item4.DisplayName;
-                    string TEMP_Url = item4.WebsiteUrl;
-                    string TEMP_IATA = item4.IATA;
-                    csv.WriteField(TEMP_IATA);
-                    csv.WriteField(TEMP_Name);
-                    csv.WriteField(TEMP_Url);
-                    csv.WriteField("America/Bogota");
-                    csv.WriteField("ES");
-                    csv.WriteField("");
-                    csv.WriteField("");
-                    csv.WriteField("");
-                    csv.NextRecord();
+                    using (var client = new WebClient())
+                    {
+                        client.Encoding = Encoding.UTF8;
+                        string url = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirline + airlines[i].FlightAirline;
+                        var json = client.DownloadString(url);
+                        dynamic AirlineResponseJson = JsonConvert.DeserializeObject(json);
+                        csv.WriteField(Convert.ToString(AirlineResponseJson[0].code));
+                        csv.WriteField(Convert.ToString(AirlineResponseJson[0].name));
+                        csv.WriteField(Convert.ToString(AirlineResponseJson[0].website));
+                        csv.WriteField("America/Bogota");
+                        csv.WriteField("ES");
+                        csv.WriteField(Convert.ToString(AirlineResponseJson[0].phone));
+                        csv.WriteField("");
+                        csv.WriteField("");
+                        csv.NextRecord();
+                        
+                    }
                 }                    
             }
 
@@ -472,13 +383,25 @@ namespace CI_OneWorldParser
 
                 for (int i = 0; i < routes.Count; i++) // Loop through List with for)
                 {
-                    //var item4 = _Airlines.Find(q => q.Name == routes[i].FlightAirline);
-                    //string TEMP_Name = item4.DisplayName;
-                    //string TEMP_Url = item4.WebsiteUrl;
-                    //string TEMP_IATA = item4.IATA;
+                    string FromAirportName = null;
+                    string ToAirportName = null;
+                    using (var client = new WebClient())
+                    {
+                        client.Encoding = Encoding.UTF8;
+                        string url = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirport + routes[i].FromIATA;
+                        var json = client.DownloadString(url);
+                        dynamic AirportResponseJson = JsonConvert.DeserializeObject(json);
+                        FromAirportName = Convert.ToString(AirportResponseJson[0].name);                        
+                    }
+                    using (var client = new WebClient())
+                    {
+                        client.Encoding = Encoding.UTF8;
+                        string url = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirport + routes[i].ToIATA;
+                        var json = client.DownloadString(url);
+                        dynamic AirportResponseJson = JsonConvert.DeserializeObject(json);
+                        ToAirportName = Convert.ToString(AirportResponseJson[0].name);
+                    }
 
-                    var FromAirportInfo = IATAAirports.Find(q => q.stop_id == routes[i].FromIATA);
-                    var ToAirportInfo = IATAAirports.Find(q => q.stop_id == routes[i].ToIATA);
                     // Info used to determine if its a domestic, international, or intercontinental flight
                     var FromAirportInfo2 = Airports.Find(q => q.STACODE == routes[i].FromIATA);
                     var ToAirportInfo2 = Airports.Find(q => q.STACODE == routes[i].ToIATA);
@@ -486,9 +409,9 @@ namespace CI_OneWorldParser
                     csvroutes.WriteField(routes[i].FromIATA + routes[i].ToIATA + routes[i].FlightAirline);
                     csvroutes.WriteField(routes[i].FlightAirline);
                     csvroutes.WriteField("");
-                    if (FromAirportInfo != null & ToAirportInfo != null)
+                    if (FromAirportName != null & ToAirportName != null)
                     {
-                        csvroutes.WriteField(FromAirportInfo.stop_name + " - " + ToAirportInfo.stop_name);
+                        csvroutes.WriteField(FromAirportName + " - " + ToAirportName);
                     }
                     else
                     {
@@ -554,16 +477,24 @@ namespace CI_OneWorldParser
 
                 for (int i = 0; i < agencyairportsiata.Count; i++) // Loop through List with for)
                 {
-                    //int result1 = IATAAirports.FindIndex(T => T.stop_id == 9458)
-                    var airportinfo = IATAAirports.Find(q => q.stop_id == agencyairportsiata[i]);
-                    csvstops.WriteField(airportinfo.stop_id);
-                    csvstops.WriteField(airportinfo.stop_name);
-                    csvstops.WriteField(airportinfo.stop_desc);
-                    csvstops.WriteField(airportinfo.stop_lat);
-                    csvstops.WriteField(airportinfo.stop_lon);
-                    csvstops.WriteField(airportinfo.zone_id);
-                    csvstops.WriteField(airportinfo.stop_url);
-                    csvstops.NextRecord();
+                    // Using API for airport Data.
+                    using (var client = new WebClient())
+                    {
+                        client.Encoding = Encoding.UTF8;
+                        string url = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirport + agencyairportsiata[i];
+                        var json = client.DownloadString(url);
+                        dynamic AirportResponseJson = JsonConvert.DeserializeObject(json);
+
+                        csvstops.WriteField(Convert.ToString(AirportResponseJson[0].code));
+                        csvstops.WriteField(Convert.ToString(AirportResponseJson[0].name));
+                        csvstops.WriteField("");
+                        csvstops.WriteField(Convert.ToString(AirportResponseJson[0].lat));
+                        csvstops.WriteField(Convert.ToString(AirportResponseJson[0].lng));
+                        csvstops.WriteField("");
+                        csvstops.WriteField(Convert.ToString(AirportResponseJson[0].website));
+                        csvstops.WriteField(Convert.ToString(AirportResponseJson[0].timezone));
+                        csvstops.NextRecord();
+                    }
                 }
             }                
 
@@ -649,16 +580,29 @@ namespace CI_OneWorldParser
                             csvcalendar.NextRecord();
 
                             // Trips
-
-                            //var item4 = _Airlines.Find(q => q.Name == CIFLights[i].FlightAirline);
-                            //string TEMP_IATA = item4.IATA;
-                            var FromAirportInfo = IATAAirports.Find(q => q.stop_id == CIFLights[i].FromIATA);
-                            var ToAirportInfo = IATAAirports.Find(q => q.stop_id == CIFLights[i].ToIATA);
+                            string FromAirportName = null;
+                            string ToAirportName = null;
+                            using (var client = new WebClient())
+                            {
+                                client.Encoding = Encoding.UTF8;
+                                string url = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirport + CIFLights[i].FromIATA;
+                                var json = client.DownloadString(url);
+                                dynamic AirportResponseJson = JsonConvert.DeserializeObject(json);
+                                FromAirportName = Convert.ToString(AirportResponseJson[0].name);
+                            }
+                            using (var client = new WebClient())
+                            {
+                                client.Encoding = Encoding.UTF8;
+                                string url = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirport + CIFLights[i].ToIATA;
+                                var json = client.DownloadString(url);
+                                dynamic AirportResponseJson = JsonConvert.DeserializeObject(json);
+                                ToAirportName = Convert.ToString(AirportResponseJson[0].name);
+                            }
 
                             csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA + CIFLights[i].FlightAirline);
                             csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA + CIFLights[i].FlightNumber.Replace(" ", "") + String.Format("{0:yyyyMMdd}", CIFLights[i].FromDate) + String.Format("{0:yyyyMMdd}", CIFLights[i].ToDate) + Convert.ToInt32(CIFLights[i].FlightMonday) + Convert.ToInt32(CIFLights[i].FlightTuesday) + Convert.ToInt32(CIFLights[i].FlightWednesday) + Convert.ToInt32(CIFLights[i].FlightThursday) + Convert.ToInt32(CIFLights[i].FlightFriday) + Convert.ToInt32(CIFLights[i].FlightSaterday) + Convert.ToInt32(CIFLights[i].FlightSunday));
                             csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA + CIFLights[i].FlightNumber.Replace(" ", "") + String.Format("{0:yyyyMMdd}", CIFLights[i].FromDate) + String.Format("{0:yyyyMMdd}", CIFLights[i].ToDate) + Convert.ToInt32(CIFLights[i].FlightMonday) + Convert.ToInt32(CIFLights[i].FlightTuesday) + Convert.ToInt32(CIFLights[i].FlightWednesday) + Convert.ToInt32(CIFLights[i].FlightThursday) + Convert.ToInt32(CIFLights[i].FlightFriday) + Convert.ToInt32(CIFLights[i].FlightSaterday) + Convert.ToInt32(CIFLights[i].FlightSunday));
-                            csvtrips.WriteField(ToAirportInfo.stop_name);
+                            csvtrips.WriteField(ToAirportName);
                             csvtrips.WriteField(CIFLights[i].FlightNumber);
                             csvtrips.WriteField("");
                             csvtrips.WriteField("");
@@ -673,7 +617,7 @@ namespace CI_OneWorldParser
                             csvstoptimes.WriteField(CIFLights[i].DepartTime + ":00");
                             csvstoptimes.WriteField(CIFLights[i].FromIATA);
                             csvstoptimes.WriteField("0");
-                            csvstoptimes.WriteField(ToAirportInfo.stop_name);
+                            csvstoptimes.WriteField(ToAirportName);
                             csvstoptimes.WriteField("0");
                             csvstoptimes.WriteField("0");
                             csvstoptimes.WriteField("");
@@ -725,10 +669,6 @@ namespace CI_OneWorldParser
             string zipPath = DataDir + "\\OneWorld.zip";
             if (File.Exists(zipPath)) { File.Delete(zipPath); }
             ZipFile.CreateFromDirectory(startPath, zipPath, CompressionLevel.Fastest, false);
-                
-
-
-
         }
 
     }
