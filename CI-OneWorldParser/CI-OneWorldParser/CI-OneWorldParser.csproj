@@ -84,13 +84,7 @@
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="airports.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="app.config" />
-    <None Include="IATAAirlines.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="IATAAirports.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
