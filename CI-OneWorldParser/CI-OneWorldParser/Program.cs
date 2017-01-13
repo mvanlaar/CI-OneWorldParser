@@ -19,24 +19,15 @@ namespace CI_OneWorldParser
     {
         public static readonly List<string> _ColombiaAirports = new List<string>() { "APO", "AUC", "AXM", "BSC", "EJA", "BAQ", "BOG", "BGA", "BUN", "CLO", "CTG", "CRC", "CZU", "CUC", "EYP", "FLA", "GIR", "GPI", "IBE", "LET", "MZL", "MQU", "EOH", "MDE", "MVP", "MTR", "NVA", "PSO", "PEI", "PPN", "PVA", "PUU", "PCR", "UIB", "RCH", "ADZ", "SJE", "SVI", "SMR", "RVE", "TME", "TLU", "TCO", "VUP", "VVC", "ACD", "AFI", "ACR", "ARQ", "NBB", "CPB", "CCO", "CUO", "CAQ", "CPL", "IGO", "CIM", "COG", "RAV", "BHF", "EBG", "ELB", "ECR", "LGT", "HTZ", "IPI", "JUO", "LMC", "LPD", "LPE", "MGN", "MCJ", "MFS", "MMP", "MTB", "NCI", "NQU", "OCV", "ORC", "RON", "PZA", "PTX", "PLT", "PBE", "PDA", "LQM", "NAR", "OTU", "SNT", "AYG", "SSL", "SOX", "TTM", "TCD", "TIB", "TBD", "TDA", "TRB", "URI", "URR", "VGZ", "LCR", "SQE", "SRS", "ULQ", "CVE", "PAL", "PYA", "TQS", "API" };
 
-        public class Airport
-        {
-            public string STACODE { get; set; }
-            public string CNTRYCODE { get; set; }
-            public string REGIONCODE { get; set; }
-        }
+        
         [Serializable]
         public class CIFLight
         {
             // Auto-implemented properties. 
 
-            public string FromIATA;
-            public string FromIATACountry;
-            public string FromIATARegion;
+            public string FromIATA;            
             public string FromIATATerminal;
-            public string ToIATA;
-            public string ToIATACountry;
-            public string ToIATARegion;
+            public string ToIATA;           
             public string ToIATATerminal;
             public DateTime FromDate;
             public DateTime ToDate;
@@ -74,8 +65,8 @@ namespace CI_OneWorldParser
             string sqldb = Path.Combine(DataDir, "cm.sqlite");
             string APIPathAirport = "airport/iata/";
             string APIPathAirline = "airline/iata/";
-            List<CIFLight> CIFLights = new List<CIFLight> { };
-            List<Airport> Airports = new List<Airport> { };
+            const string ua = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)";
+            List<CIFLight> CIFLights = new List<CIFLight> { };            
             Console.WriteLine("Requesting Latest update...");
             CultureInfo ci = new CultureInfo("en-US");
             string dateformat = "hh:mm";
@@ -151,19 +142,7 @@ namespace CI_OneWorldParser
             m_dbConnection = new SQLiteConnection("Data Source=" + sqldb + ";Version=3;");
             m_dbConnection.Open();
 
-            string sqlairports = "select STACODE, CNTRYCODE,REGIONCODE from STATION_GEO_XREF;";
-
-            SQLiteCommand commandairport = new SQLiteCommand(sqlairports, m_dbConnection);
-            SQLiteDataReader readerairport = commandairport.ExecuteReader();
-            while (readerairport.Read())
-            {
-                var Airport = new Airport();
-                Airport.STACODE = readerairport["STACODE"].ToString();
-                Airport.CNTRYCODE = readerairport["CNTRYCODE"].ToString();
-                Airport.REGIONCODE = readerairport["REGIONCODE"].ToString();
-                Airports.Add(Airport);
-            }
-            readerairport.Close();
+            
             // Start Loading the Flights
             Console.WriteLine("Loading Flights...");
             string sqlflights = "select * from GSEC_MODIFIED where CODESHARE = 0;";
@@ -204,19 +183,7 @@ namespace CI_OneWorldParser
                 TEMP_FromIATA = readerflights["CODE_DEP"].ToString();
                 TEMP_ToIATA = readerflights["CODE_ARR"].ToString();
 
-                // Check Region & Country
-                var FromAirportInfo = Airports.Find(q => q.STACODE == TEMP_FromIATA);
-                var ToAirportInfo = Airports.Find(q => q.STACODE == TEMP_ToIATA);
-                if (FromAirportInfo != null)
-                {
-                    TEMP_FromIATARegion = FromAirportInfo.REGIONCODE;
-                    TEMP_FromIATACountry = FromAirportInfo.CNTRYCODE;
-                }
-                if (ToAirportInfo != null)
-                {
-                    TEMP_ToIATACountry = ToAirportInfo.CNTRYCODE;
-                    TEMP_ToIATARegion = ToAirportInfo.REGIONCODE;
-                }
+                
                 TEMP_ValidFrom = DateTime.Parse(readerflights["DATE_FROM"].ToString());
                 TEMP_ValidTo = DateTime.Parse(readerflights["DATE_TO"].ToString());
                 TEMP_FlightMonday = Boolean.Parse(readerflights["op1"].ToString());
@@ -249,8 +216,7 @@ namespace CI_OneWorldParser
                 if (readerflights["STOPS"].ToString() == "1")
                 {
                     TEMP_FlightNonStop = false;
-                    TEMP_FlightVia = readerflights["STOP_CODE"].ToString();
-                    var ViaAirportInfo = Airports.Find(q => q.STACODE == TEMP_FlightVia);
+                    TEMP_FlightVia = readerflights["STOP_CODE"].ToString();                    
                 }
                 TEMP_Airline = readerflights["CARRIER"].ToString();
                 TEMP_FlightNextDays = int.Parse(readerflights["EXTRA_DAY"].ToString());
@@ -261,13 +227,9 @@ namespace CI_OneWorldParser
 
                     CIFLights.Add(new CIFLight
                     {
-                        FromIATA = TEMP_FromIATA,
-                        FromIATARegion = TEMP_FromIATARegion,
-                        FromIATACountry = TEMP_FromIATACountry,
+                        FromIATA = TEMP_FromIATA,                        
                         FromIATATerminal = TEMP_FromIATATerminal,
-                        ToIATA = TEMP_ToIATA,
-                        ToIATACountry = TEMP_ToIATACountry,
-                        ToIATARegion = TEMP_ToIATARegion,
+                        ToIATA = TEMP_ToIATA,                        
                         ToIATATerminal = TEMP_ToIATATerminal,
                         FromDate = TEMP_ValidFrom,
                         ToDate = TEMP_ValidTo,
@@ -292,8 +254,7 @@ namespace CI_OneWorldParser
                         FlightVia = TEMP_FlightVia
                     });
                 }
-            }
-            readerairport.Close(); 
+            }            
             m_dbConnection.Close();
 
             //CIFLights.RemoveAll(s => s.FromIATACountry != "CO" | s.ToIATACountry != "CO");
@@ -385,64 +346,58 @@ namespace CI_OneWorldParser
                 {
                     string FromAirportName = null;
                     string ToAirportName = null;
-                    using (var client = new WebClient())
+                    string FromAirportCountry = null;
+                    string FromAirportContinent = null;
+                    string ToAirportCountry = null;
+                    string ToAirportContinent = null;
+
+                    using (var clientFrom = new WebClient())
                     {
-                        client.Encoding = Encoding.UTF8;
-                        string url = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirport + routes[i].FromIATA;
-                        var json = client.DownloadString(url);
-                        dynamic AirportResponseJson = JsonConvert.DeserializeObject(json);
-                        FromAirportName = Convert.ToString(AirportResponseJson[0].name);                        
-                    }
-                    using (var client = new WebClient())
-                    {
-                        client.Encoding = Encoding.UTF8;
-                        string url = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirport + routes[i].ToIATA;
-                        var json = client.DownloadString(url);
-                        dynamic AirportResponseJson = JsonConvert.DeserializeObject(json);
-                        ToAirportName = Convert.ToString(AirportResponseJson[0].name);
+                        clientFrom.Encoding = Encoding.UTF8;
+                        clientFrom.Headers.Add("user-agent", ua);
+                        string urlapiFrom = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirport + routes[i].FromIATA;
+                        var jsonapiFrom = clientFrom.DownloadString(urlapiFrom);
+                        dynamic AirportResponseJsonFrom = JsonConvert.DeserializeObject(jsonapiFrom);
+                        FromAirportName = Convert.ToString(AirportResponseJsonFrom[0].name);
+                        FromAirportCountry = Convert.ToString(AirportResponseJsonFrom[0].country_code);
+                        FromAirportContinent = Convert.ToString(AirportResponseJsonFrom[0].continent);
                     }
 
-                    // Info used to determine if its a domestic, international, or intercontinental flight
-                    var FromAirportInfo2 = Airports.Find(q => q.STACODE == routes[i].FromIATA);
-                    var ToAirportInfo2 = Airports.Find(q => q.STACODE == routes[i].ToIATA);
+                    using (var clientTo = new WebClient())
+                    {
+                        clientTo.Encoding = Encoding.UTF8;
+                        clientTo.Headers.Add("user-agent", ua);
+                        string urlapiTo = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirport + routes[i].ToIATA;
+                        var jsonapiTo = clientTo.DownloadString(urlapiTo);
+                        dynamic AirportResponseJsonTo = JsonConvert.DeserializeObject(jsonapiTo);
+                        ToAirportName = Convert.ToString(AirportResponseJsonTo[0].name);
+                        ToAirportCountry = Convert.ToString(AirportResponseJsonTo[0].country_code);
+                        ToAirportContinent = Convert.ToString(AirportResponseJsonTo[0].continent);
+                    }
 
-                    csvroutes.WriteField(routes[i].FromIATA + routes[i].ToIATA + routes[i].FlightAirline);
+                    csvroutes.WriteField(routes[i].FromIATA + routes[i].ToIATA);
                     csvroutes.WriteField(routes[i].FlightAirline);
-                    csvroutes.WriteField("");
-                    if (FromAirportName != null & ToAirportName != null)
+                    csvroutes.WriteField(routes[i].FromIATA + routes[i].ToIATA);
+                    csvroutes.WriteField(FromAirportName + " - " + ToAirportName);                                   
+                    csvroutes.WriteField(""); // routes[i].FlightAircraft + ";" + CIFLights[i].FlightAirline + ";" + CIFLights[i].FlightOperator + ";" + CIFLights[i].FlightCodeShare
+                    if (FromAirportCountry == ToAirportCountry)
                     {
-                        csvroutes.WriteField(FromAirportName + " - " + ToAirportName);
+                        // Colombian internal flight domestic
+                        csvroutes.WriteField(1102);
                     }
                     else
                     {
-                        csvroutes.WriteField(routes[i].FromIATA + routes[i].ToIATA + routes[i].FlightAirline);
-                    }                    
-                    csvroutes.WriteField(""); // routes[i].FlightAircraft + ";" + CIFLights[i].FlightAirline + ";" + CIFLights[i].FlightOperator + ";" + CIFLights[i].FlightCodeShare
-                    if (FromAirportInfo2 != null & ToAirportInfo2 != null)
-                    {
-                        if (FromAirportInfo2.CNTRYCODE == ToAirportInfo2.CNTRYCODE)
+                        if (FromAirportContinent == ToAirportContinent)
                         {
-                            // Colombian internal flight domestic
-                            csvroutes.WriteField(1102);
+                            // International Flight
+                            csvroutes.WriteField(1101);
                         }
                         else
                         {
-                            if (FromAirportInfo2.REGIONCODE == ToAirportInfo2.REGIONCODE)
-                            {
-                                // International Flight
-                                csvroutes.WriteField(1101);
-                            }
-                            else
-                            {
-                                // Intercontinental Flight
-                                csvroutes.WriteField(1103);
-                            }
-                        }                        
+                            // Intercontinental Flight
+                            csvroutes.WriteField(1103);
+                        }
                     }
-                    else
-                    {
-                        csvroutes.WriteField(1102);
-                    }                    
                     csvroutes.WriteField("");
                     csvroutes.WriteField("");
                     csvroutes.WriteField("");
@@ -599,7 +554,7 @@ namespace CI_OneWorldParser
                                 ToAirportName = Convert.ToString(AirportResponseJson[0].name);
                             }
 
-                            csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA + CIFLights[i].FlightAirline);
+                            csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA);
                             csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA + CIFLights[i].FlightNumber.Replace(" ", "") + String.Format("{0:yyyyMMdd}", CIFLights[i].FromDate) + String.Format("{0:yyyyMMdd}", CIFLights[i].ToDate) + Convert.ToInt32(CIFLights[i].FlightMonday) + Convert.ToInt32(CIFLights[i].FlightTuesday) + Convert.ToInt32(CIFLights[i].FlightWednesday) + Convert.ToInt32(CIFLights[i].FlightThursday) + Convert.ToInt32(CIFLights[i].FlightFriday) + Convert.ToInt32(CIFLights[i].FlightSaterday) + Convert.ToInt32(CIFLights[i].FlightSunday));
                             csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA + CIFLights[i].FlightNumber.Replace(" ", "") + String.Format("{0:yyyyMMdd}", CIFLights[i].FromDate) + String.Format("{0:yyyyMMdd}", CIFLights[i].ToDate) + Convert.ToInt32(CIFLights[i].FlightMonday) + Convert.ToInt32(CIFLights[i].FlightTuesday) + Convert.ToInt32(CIFLights[i].FlightWednesday) + Convert.ToInt32(CIFLights[i].FlightThursday) + Convert.ToInt32(CIFLights[i].FlightFriday) + Convert.ToInt32(CIFLights[i].FlightSaterday) + Convert.ToInt32(CIFLights[i].FlightSunday));
                             csvtrips.WriteField(ToAirportName);
