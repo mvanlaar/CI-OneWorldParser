@@ -375,7 +375,7 @@ namespace CI_OneWorldParser
                         ToAirportContinent = Convert.ToString(AirportResponseJsonTo[0].continent);
                     }
 
-                    csvroutes.WriteField(routes[i].FromIATA + routes[i].ToIATA);
+                    csvroutes.WriteField(routes[i].FromIATA + routes[i].ToIATA + routes[i].FlightAirline);
                     csvroutes.WriteField(routes[i].FlightAirline);
                     csvroutes.WriteField(routes[i].FromIATA + routes[i].ToIATA);
                     csvroutes.WriteField(FromAirportName + " - " + ToAirportName);                                   
@@ -554,7 +554,7 @@ namespace CI_OneWorldParser
                                 ToAirportName = Convert.ToString(AirportResponseJson[0].name);
                             }
 
-                            csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA);
+                            csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA + CIFLights[i].FlightAirline);
                             csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA + CIFLights[i].FlightNumber.Replace(" ", "") + String.Format("{0:yyyyMMdd}", CIFLights[i].FromDate) + String.Format("{0:yyyyMMdd}", CIFLights[i].ToDate) + Convert.ToInt32(CIFLights[i].FlightMonday) + Convert.ToInt32(CIFLights[i].FlightTuesday) + Convert.ToInt32(CIFLights[i].FlightWednesday) + Convert.ToInt32(CIFLights[i].FlightThursday) + Convert.ToInt32(CIFLights[i].FlightFriday) + Convert.ToInt32(CIFLights[i].FlightSaterday) + Convert.ToInt32(CIFLights[i].FlightSunday));
                             csvtrips.WriteField(CIFLights[i].FromIATA + CIFLights[i].ToIATA + CIFLights[i].FlightNumber.Replace(" ", "") + String.Format("{0:yyyyMMdd}", CIFLights[i].FromDate) + String.Format("{0:yyyyMMdd}", CIFLights[i].ToDate) + Convert.ToInt32(CIFLights[i].FlightMonday) + Convert.ToInt32(CIFLights[i].FlightTuesday) + Convert.ToInt32(CIFLights[i].FlightWednesday) + Convert.ToInt32(CIFLights[i].FlightThursday) + Convert.ToInt32(CIFLights[i].FlightFriday) + Convert.ToInt32(CIFLights[i].FlightSaterday) + Convert.ToInt32(CIFLights[i].FlightSunday));
                             csvtrips.WriteField(ToAirportName);
