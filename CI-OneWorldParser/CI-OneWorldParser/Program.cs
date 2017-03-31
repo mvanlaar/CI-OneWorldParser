@@ -18,8 +18,7 @@ namespace CI_OneWorldParser
     public class Program
     {
         public static readonly List<string> _ColombiaAirports = new List<string>() { "APO", "AUC", "AXM", "BSC", "EJA", "BAQ", "BOG", "BGA", "BUN", "CLO", "CTG", "CRC", "CZU", "CUC", "EYP", "FLA", "GIR", "GPI", "IBE", "LET", "MZL", "MQU", "EOH", "MDE", "MVP", "MTR", "NVA", "PSO", "PEI", "PPN", "PVA", "PUU", "PCR", "UIB", "RCH", "ADZ", "SJE", "SVI", "SMR", "RVE", "TME", "TLU", "TCO", "VUP", "VVC", "ACD", "AFI", "ACR", "ARQ", "NBB", "CPB", "CCO", "CUO", "CAQ", "CPL", "IGO", "CIM", "COG", "RAV", "BHF", "EBG", "ELB", "ECR", "LGT", "HTZ", "IPI", "JUO", "LMC", "LPD", "LPE", "MGN", "MCJ", "MFS", "MMP", "MTB", "NCI", "NQU", "OCV", "ORC", "RON", "PZA", "PTX", "PLT", "PBE", "PDA", "LQM", "NAR", "OTU", "SNT", "AYG", "SSL", "SOX", "TTM", "TCD", "TIB", "TBD", "TDA", "TRB", "URI", "URR", "VGZ", "LCR", "SQE", "SRS", "ULQ", "CVE", "PAL", "PYA", "TQS", "API" };
-
-        
+                
         [Serializable]
         public class CIFLight
         {
@@ -65,7 +64,8 @@ namespace CI_OneWorldParser
             string sqldb = Path.Combine(DataDir, "cm.sqlite");
             string APIPathAirport = "airport/iata/";
             string APIPathAirline = "airline/iata/";
-            const string ua = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)";
+            const string ua = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
+            const string HeaderAccept = "text/html,application/xhtml+xml,application/xml;q=0.9,*;q=0.8";
             List<CIFLight> CIFLights = new List<CIFLight> { };            
             Console.WriteLine("Requesting Latest update...");
             CultureInfo ci = new CultureInfo("en-US");
@@ -299,23 +299,31 @@ namespace CI_OneWorldParser
 
                 for (int i = 0; i < airlines.Count; i++) // Loop through List with for)
                 {
-                    using (var client = new WebClient())
+                    string urlapi = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirline + airlines[0].FlightAirline.Trim();
+                    string RequestAirlineJson = String.Empty;
+                    HttpWebRequest requestAirline = (HttpWebRequest)WebRequest.Create(urlapi);
+
+                    requestAirline.Method = "GET";
+                    requestAirline.UserAgent = ua;
+                    requestAirline.Accept = HeaderAccept;
+                    requestAirline.Proxy = null;
+                    requestAirline.KeepAlive = false;
+                    using (HttpWebResponse Airlineresponse = (HttpWebResponse)requestAirline.GetResponse())
+                    using (StreamReader reader = new StreamReader(Airlineresponse.GetResponseStream()))
                     {
-                        client.Encoding = Encoding.UTF8;
-                        string url = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirline + airlines[i].FlightAirline;
-                        var json = client.DownloadString(url);
-                        dynamic AirlineResponseJson = JsonConvert.DeserializeObject(json);
-                        csv.WriteField(Convert.ToString(AirlineResponseJson[0].code));
-                        csv.WriteField(Convert.ToString(AirlineResponseJson[0].name));
-                        csv.WriteField(Convert.ToString(AirlineResponseJson[0].website));
-                        csv.WriteField("America/Bogota");
-                        csv.WriteField("ES");
-                        csv.WriteField(Convert.ToString(AirlineResponseJson[0].phone));
-                        csv.WriteField("");
-                        csv.WriteField("");
-                        csv.NextRecord();
-                        
+                        RequestAirlineJson = reader.ReadToEnd();
                     }
+
+                    dynamic AirlineResponseJson = JsonConvert.DeserializeObject(RequestAirlineJson);
+                    csv.WriteField(Convert.ToString(AirlineResponseJson[0].code));
+                    csv.WriteField(Convert.ToString(AirlineResponseJson[0].name));
+                    csv.WriteField(Convert.ToString(AirlineResponseJson[0].website));
+                    csv.WriteField("America/Bogota");
+                    csv.WriteField("ES");
+                    csv.WriteField(Convert.ToString(AirlineResponseJson[0].phone));
+                    csv.WriteField("");
+                    csv.WriteField("");
+                    csv.NextRecord();                    
                 }                    
             }
 
