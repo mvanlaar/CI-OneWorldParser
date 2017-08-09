@@ -10,8 +10,8 @@ using System.Text;
 using System.Xml;
 using System.IO.Compression;
 using CsvHelper;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace CI_OneWorldParser
 {
@@ -69,7 +69,11 @@ namespace CI_OneWorldParser
             List<CIFLight> CIFLights = new List<CIFLight> { };            
             Console.WriteLine("Requesting Latest update...");
             CultureInfo ci = new CultureInfo("en-US");
+            Thread.CurrentThread.CurrentCulture = ci;
+            Thread.CurrentThread.CurrentUICulture = ci;
+
             string dateformat = "hh:mm";
+
             
             var request = (HttpWebRequest)WebRequest.Create("http://mtk.innovataw3svc.com/MapDataToolKitServices.asmx/GetLastUpdate?");
 
@@ -299,7 +303,7 @@ namespace CI_OneWorldParser
 
                 for (int i = 0; i < airlines.Count; i++) // Loop through List with for)
                 {
-                    string urlapi = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirline + airlines[0].FlightAirline.Trim();
+                    string urlapi = ConfigurationManager.AppSettings.Get("APIUrl") + APIPathAirline + airlines[i].FlightAirline.Trim();
                     string RequestAirlineJson = String.Empty;
                     HttpWebRequest requestAirline = (HttpWebRequest)WebRequest.Create(urlapi);
 
@@ -427,6 +431,8 @@ namespace CI_OneWorldParser
                 csvstops.Configuration.Delimiter = ",";
                 csvstops.Configuration.Encoding = Encoding.UTF8;
                 csvstops.Configuration.TrimFields = true;
+                //csvstops.Configuration.QuoteNoFields = true;
+
                 // header                                 
                 csvstops.WriteField("stop_id");
                 csvstops.WriteField("stop_name");
